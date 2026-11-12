@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Turbo Times" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="theme-color" content="#f9f7f0" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <title>Turbo Times! — Grade 3 Multiplication Streak Arcade (Up to 10 × 10)</title>
+  <meta name="description" content="Fast, fun timed Grade 3 multiplication arcade game up to 10 × 10 with live streak combos, streak shields, and a 100-fact mastery sticker board." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="index.css" />
+</head>
+<body>
+  <canvas id="fx-canvas" aria-hidden="true"></canvas>
+
+  <div class="app-shell">
+    <!-- Top Header -->
+    <header class="top-bar">
+      <div class="brand-group">
+        <div class="brand-logo" aria-hidden="true">×</div>
+        <div>
+          <h1 class="brand-title">Turbo Times!</h1>
+          <div class="brand-subtitle">Grade 3 Edition • Up to 10 × 10</div>
+        </div>
+      </div>
+
+      <nav class="header-actions" aria-label="Game controls">
+        <button type="button" id="btn-home-top" class="btn-tactile btn-icon" style="display: none;">
+          ← Setup
+        </button>
+        <button type="button" id="btn-mastery" class="btn-tactile btn-icon">
+          🏆 10×10 Board
+        </button>
+        <button type="button" id="btn-sound" class="btn-tactile btn-icon">
+          🔊 Sound
+        </button>
+      </nav>
+    </header>
+
+    <!-- Main Stage -->
+    <main class="stage-card">
+
+      <!-- ================================================================
+           SCREEN 1: HOME & SETUP
+           ================================================================ -->
+      <section id="screen-home" class="screen active" aria-label="Game setup">
+        <div class="hero-banner">
+          <div class="hero-copy">
+            <h2>Beat the Clock. Build Your Streak!</h2>
+            <p>Every <strong>5-streak</strong> boosts your timer, and a <strong>10-streak</strong> unlocks a Streak Shield!</p>
+          </div>
+          <div id="home-mascot" aria-hidden="true"></div>
+        </div>
+
+        <div class="records-row">
+          <div class="record-tile">
+            <div class="record-label">Best Streak</div>
+            <div id="rec-best-streak" class="record-value streak-accent">0 🔥</div>
+          </div>
+          <div class="record-tile">
+            <div class="record-label">High Score</div>
+            <div id="rec-high-score" class="record-value">0</div>
+          </div>
+          <div class="record-tile">
+            <div class="record-label">10×10 Unlocked</div>
+            <div id="rec-mastered" class="record-value">0 / 100</div>
+          </div>
+        </div>
+
+        <!-- Timer Mode -->
+        <div class="config-group">
+          <div class="config-label">
+            <span>1. Pick Your Timer</span>
+            <span class="config-hint">+Bonus seconds every 5 in a row!</span>
+          </div>
+          <div class="mode-pills">
+            <button type="button" id="mode-blitz60" class="pill-choice selected" data-timer-mode="blitz60">
+              <span class="pill-choice-title">⚡ 60s Turbo Blitz</span>
+              <span class="pill-choice-desc">1-minute high-speed streak rush</span>
+            </button>
+            <button type="button" id="mode-rush90" class="pill-choice" data-timer-mode="rush90">
+              <span class="pill-choice-title">🔥 90s Mega Streak</span>
+              <span class="pill-choice-desc">Extra time to chase huge streaks</span>
+            </button>
+            <button type="button" id="mode-card10" class="pill-choice" data-timer-mode="card10">
+              <span class="pill-choice-title">⏱️ 10s Speed Cards</span>
+              <span class="pill-choice-desc">20 cards • 10 seconds per card</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Input Mode -->
+        <div class="config-group">
+          <div class="config-label">
+            <span>2. How Do You Want to Answer?</span>
+          </div>
+          <div class="mode-pills">
+            <button type="button" id="input-choices" class="pill-choice selected" data-input-mode="choices">
+              <span class="pill-choice-title">🕹️ 4 Arcade Buttons</span>
+              <span class="pill-choice-desc">Tap a button or press keys 1–4</span>
+            </button>
+            <button type="button" id="input-keypad" class="pill-choice" data-input-mode="keypad">
+              <span class="pill-choice-title">🔢 Number Pad / Type</span>
+              <span class="pill-choice-desc">Type the answer (auto-checks instantly!)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Times Tables Filter -->
+        <div class="config-group">
+          <div class="config-label">
+            <span>3. Times Tables (Up to 10 × 10)</span>
+            <button type="button" id="btn-all-tables" class="table-chip active" style="padding: 3px 10px; font-size: 0.8rem;">
+              ✓ All 1–10 Active
+            </button>
+          </div>
+          <div id="tables-selector" class="tables-selector" role="group" aria-label="Choose times tables"></div>
+        </div>
+
+        <div class="start-cta-wrap">
+          <button type="button" id="btn-start-game" class="btn-tactile btn-primary">
+            🚀 START STREAK CHALLENGE!
+          </button>
+        </div>
+      </section>
+
+      <!-- ================================================================
+           SCREEN 2: LIVE GAMEPLAY
+           ================================================================ -->
+      <section id="screen-play" class="screen" aria-label="Multiplication Arena">
+        <!-- Score + Streak + Best -->
+        <div class="hud-bar">
+          <div class="hud-stat">
+            <span class="hud-stat-label">Score</span>
+            <span id="hud-score" class="hud-stat-val">0</span>
+          </div>
+
+          <div id="streak-badge" class="streak-badge" aria-live="polite">
+            <span id="streak-fire" class="streak-fire">⚡</span>
+            <span id="hud-streak" class="streak-count-text">0</span>
+            <span id="hud-mult" class="multiplier-tag">1×</span>
+            <span id="shield-indicator" class="shield-indicator" title="Streak Shield Active!">🛡️</span>
+          </div>
+
+          <div class="hud-stat">
+            <span id="hud-right-label" class="hud-stat-label">Best Streak</span>
+            <span id="hud-right-val" class="hud-stat-val">0</span>
+          </div>
+        </div>
+
+        <!-- Countdown Bar -->
+        <div class="timer-wrap">
+          <div class="timer-track">
+            <div id="timer-fill" class="timer-fill"></div>
+          </div>
+          <div id="timer-seconds" class="timer-seconds">60s</div>
+        </div>
+
+        <!-- Equation Stage -->
+        <div id="problem-arena" class="problem-arena">
+          <div class="mascot-mini-row">
+            <div id="play-mascot" aria-hidden="true"></div>
+            <div id="streak-callout" class="streak-callout">🎯 Ready, Set, Multiply!</div>
+          </div>
+
+          <div class="equation-display" aria-live="assertive">
+            <span id="eq-a">6</span>
+            <span class="eq-op">×</span>
+            <span id="eq-b">7</span>
+            <span class="eq-op">=</span>
+            <span id="eq-slot" class="eq-slot">?</span>
+          </div>
+
+          <div id="learning-helper" class="learning-helper"></div>
+        </div>
+
+        <!-- Answer Controls (Choices OR Keypad) -->
+        <div id="choices-grid" class="choices-grid"></div>
+        <div id="keypad-wrap" class="keypad-wrap"></div>
+      </section>
+
+      <!-- ================================================================
+           SCREEN 3: ROUND SUMMARY
+           ================================================================ -->
+      <section id="screen-summary" class="screen" aria-label="Round results">
+        <div class="summary-header">
+          <div id="sum-badge" class="summary-badge">🎉 GREAT RUN!</div>
+          <h2 id="sum-title" class="summary-title">Awesome Turbo Speed!</h2>
+        </div>
+
+        <div class="summary-stats-grid">
+          <div class="sum-card">
+            <div id="sum-best-streak" class="sum-card-val highlight">0 🔥</div>
+            <div class="sum-card-lbl">Round Streak</div>
+          </div>
+          <div class="sum-card">
+            <div id="sum-score" class="sum-card-val">0</div>
+            <div class="sum-card-lbl">Total Score</div>
+          </div>
+          <div class="sum-card">
+            <div id="sum-solved" class="sum-card-val">0</div>
+            <div class="sum-card-lbl">Facts Solved</div>
+          </div>
+          <div class="sum-card">
+            <div id="sum-accuracy" class="sum-card-val">100%</div>
+            <div class="sum-card-lbl">Accuracy</div>
+          </div>
+        </div>
+
+        <div id="tricky-box" class="tricky-facts-box">
+          <h3 id="tricky-title">🌟 Spotless Round!</h3>
+          <div id="tricky-pills" class="fact-pills"></div>
+        </div>
+
+        <div class="summary-actions">
+          <button type="button" id="btn-play-again" class="btn-tactile btn-primary">
+            🔄 Play Again!
+          </button>
+          <button type="button" id="btn-back-setup" class="btn-tactile btn-coral">
+            ⚙️ Change Tables / Mode
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer-note">
+      Tip: Use keys <strong>1–4</strong> in Arcade Button mode, or type digits <strong>0–9</strong> directly in Number Pad mode!
+    </footer>
+  </div>
+
+  <!-- 10 × 10 Mastery Sticker Grid Modal -->
+  <div id="modal-mastery" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="mastery-modal-title">
+    <div class="modal-panel">
+      <div class="modal-top">
+        <h2 id="mastery-modal-title">🏆 10 × 10 Mastery Board</h2>
+        <button type="button" id="btn-close-mastery" class="btn-tactile btn-icon">✕ Close</button>
+      </div>
+      <p style="font-size: 0.9rem; color: var(--ink-body);">
+        Light up all <strong>100 multiplication facts</strong>! Solve a fact once to turn it mint, and 3 times to turn it deep emerald!
+      </p>
+
+      <div id="mastery-grid" class="mastery-grid"></div>
+
+      <div class="mastery-legend">
+        <span id="mastery-progress-text">0 of 100 facts unlocked</span>
+        <button type="button" id="btn-reset-stats" class="table-chip" style="font-size: 0.78rem; padding: 4px 10px;">
+          Reset Progress
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="sound.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
